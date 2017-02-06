@@ -2,15 +2,9 @@
 
 var Updatable = require('./Updatable');
 
-function Moveable() {
+function Moveable(o_config) {
 
 	var i_self = this;
-
-	var o_config = arguments[0] || {};
-
-	o_config = Object.assign(o_config, {
-		initEvents: o_config.initEvents ? o_config.initEvents : function() {}
-	});
 
 	Updatable.call(i_self, o_config);
 
@@ -18,6 +12,9 @@ function Moveable() {
 };
 
 Moveable.prototype = Object.create(Updatable.prototype);
-Moveable.prototype.constructor = Moveable;
+Object.assign(Moveable.prototype, {
+	constructor: Moveable,
+	initEvents: function() {}
+});
 
 module.exports = Moveable;

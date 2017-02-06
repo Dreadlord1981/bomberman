@@ -8,16 +8,15 @@ function Updatable() {
 
 	var o_config = arguments[0] || {};
 
-	o_config = Object.assign(o_config, {
-		update: o_config.update ? o_config.update : function() {}
-	});
-
 	Asset.call(i_self, o_config);
 
 	return i_self;
 };
 
 Updatable.prototype = Object.create(Asset.prototype);
-Updatable.prototype.constructor = Updatable;
+Object.assign(Updatable.prototype, {
+	constructor: Updatable,
+	update: function() {}
+});
 
 module.exports = Updatable;

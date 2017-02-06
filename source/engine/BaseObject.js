@@ -1,22 +1,12 @@
 "use strict";
 
-var BaseObject = function() {
+var BaseObject = function(o_config) {
 
 	var i_self = this;
-	var a_arguments = Array.from(arguments);
-	a_arguments.forEach(function(argument) {
-		if (typeof argument === 'object') {
 
-			for (var key in argument) {
-				if (argument.hasOwnProperty(key)) {
-					i_self[key] = argument[key];
-				}
-			}
-		}
-		else {
-			i_self[argument] = argument;
-		}
-	});
+	if (o_config) {
+		Object.assign(i_self, o_config);
+	}
 
 	return i_self;
 };
