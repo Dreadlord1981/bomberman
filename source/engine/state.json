@@ -1,0 +1,7 @@
+{
+	"ALIVE": 1,
+	"DYING": 2,
+	"DEAD": 3,
+	"IDEL": 4,
+	"MOVING": 5
+}

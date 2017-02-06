@@ -1,9 +1,15 @@
-Bomb = function(){
+"use strict";
+
+var Updatable = require('./Updatable');
+var direction = require('./direction.json');
+var Asset = require('./Asset');
+
+function Bomb() {
 	
 	var i_self = this;
 	var o_config = arguments[0] || {};
 
-	o_config = Object.assign(o_config,{
+	o_config = Object.assign(o_config, {
 		x: o_config.x,
 		y: o_config.y,
 		width: 16,
@@ -56,7 +62,7 @@ Bomb = function(){
 						x: 198,
 						y: 350
 					}
-				],
+				]
 			}
 		},
 		init: function() {
@@ -86,12 +92,11 @@ Bomb = function(){
 				}, 125);
 			}
 			else {
-				if(f_callback) {
+				if (f_callback) {
 					i_bomb.frameIndex = 0;
 					f_callback();
 				}
 			}
-			
 		},
 		update: function() {
 
@@ -99,18 +104,18 @@ Bomb = function(){
 
 			if (i_self.velocity) {
 
-				switch(i_self.direction) {
+				switch (i_self.direction) {
 
-					case Direction.UP:
+					case direction.UP:
 						i_self.y -= i_self.velocity;
 						break;
-					case Direction.DOWN:
+					case direction.DOWN:
 						i_self.y += i_self.velocity;
 						break;
-					case Direction.LEFT:
+					case direction.LEFT:
 						i_self.x -= i_self.velocity;
 						break;
-					case Direction.RIGHT:
+					case direction.RIGHT:
 						i_self.x += i_self.velocity;
 						break;
 				}
@@ -122,7 +127,7 @@ Bomb = function(){
 			var i_bombBounds = i_bomb.getBounds();
 			var a_flames = [];
 
-			for(var i = 1; i <= i_bomb.flameSize; i++) {
+			for (var i = 1; i <= i_bomb.flameSize; i++) {
 
 				var i_up = new Asset({
 					sprite: i_self.sprite,
@@ -130,7 +135,7 @@ Bomb = function(){
 					y: i_bombBounds.top - ((i_bomb.scale.height - 16) * i),
 					width: 16,
 					height: 16,
-					direction: Direction.UP,
+					direction: direction.UP,
 					scale: {
 						width: 48,
 						height: 48
@@ -150,7 +155,7 @@ Bomb = function(){
 					frames: [
 						{
 							x: i == i_bomb.flameSize ? 222 : 198,
-							y: i == i_bomb.flameSize ? 350 : 374,
+							y: i == i_bomb.flameSize ? 350 : 374
 						},
 						{
 							x: i == i_bomb.flameSize ? 246 : 222,
@@ -173,7 +178,7 @@ Bomb = function(){
 					y: i_bombBounds.top,
 					width: 16,
 					height: 16,
-					direction: Direction.LEFT,
+					direction: direction.LEFT,
 					scale: {
 						width: 48,
 						height: 48
@@ -216,7 +221,7 @@ Bomb = function(){
 					y: i_bombBounds.top,
 					width: 16,
 					height: 16,
-					direction: Direction.RIGHT,
+					direction: direction.RIGHT,
 					scale: {
 						width: 48,
 						height: 48
@@ -259,7 +264,7 @@ Bomb = function(){
 					y: i_bombBounds.top + ((i_bomb.scale.height - 16) * i),
 					width: 16,
 					height: 16,
-					direction: Direction.DOWN,
+					direction: direction.DOWN,
 					scale: {
 						width: 48,
 						height: 48
@@ -300,7 +305,6 @@ Bomb = function(){
 				i_bomb.flames.push(i_left);
 				i_bomb.flames.push(i_rigth);
 				i_bomb.flames.push(i_down);
-
 			}
 		},
 		triggerExplode: function(f_callback) {
@@ -312,7 +316,7 @@ Bomb = function(){
 			i_bomb.velocity = 0;
 			i_bomb.direction = null;
 			i_bomb.doExplode(function() {
-				if(f_callback) {
+				if (f_callback) {
 					f_callback();
 				}
 			});
@@ -335,11 +339,13 @@ Bomb = function(){
 				}, 125);
 			}
 			else {
-				if(f_callback) {
+				if (f_callback) {
 					f_callback();
 				}
 			}
 		}
 	});
-	Updatable.call(i_self, o_config)	
+	Updatable.call(i_self, o_config);	
 };
+
+module.exports = Bomb;

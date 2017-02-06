@@ -1,0 +1,9 @@
+#!/bin/bash
+
+shopt -s globstar nullglob
+cd source || exit 2
+printf '%s\n' ./**/*.js ./**/*.json | entr \
+  sh -c '(
+    ../node_modules/.bin/browserify --debug Game.js -o ../bundle.js 2>&1
+    echo Done
+  ) | sed "/^\$/d;q"'

@@ -1,21 +1,11 @@
-Direction = {
-	DOWN: 1,
-	UP: 2,
-	LEFT: 3,
-	RIGHT: 4,
-	DYING: 5,
-	IDEL: 6
-};
+"use strict";
 
-State = {
-	ALIVE: 1,
-	DYING: 2,
-	DEAD: 3,
-	IDEL: 4,
-	MOVING: 5
-};
+var utils = require('../utils');
+var direction = require('./direction.json');
+var GameMap = require('./GameMap');
+var Player = require('./Player');
 
-GameEngine = function() {
+function GameEngine() {
 
 	var i_self = this;
 	i_self = Object.assign(i_self, {
@@ -26,26 +16,28 @@ GameEngine = function() {
 
 			var i_self = this;
 			i_self.sprite = new Image();
-			i_self.sprite.src =  "/bomberman/source/resources/images/sprites.png";
 
-			var i_map = new GameMap();
+			i_self.sprite.onload = function() {
+				var i_map = new GameMap();
+				i_map.init(i_self.sprite);
 
-			i_map.init(i_self.sprite);
-			var a_spawn = i_map.points;
+				var a_spawn = i_map.points;
+				a_spawn.forEach(function(i_place) {
 
-			a_spawn.forEach(function(i_place) {
-
-				var i_player = new Player({
-					x: i_place.x,
-					y: i_place.y
+					var i_player = new Player({
+						x: i_place.x,
+						y: i_place.y
+					});
+					i_player.initialize(i_self.sprite);
+					i_self.players.push(i_player);
 				});
-				i_player.initialize(i_self.sprite);
-				i_self.players.push(i_player);
-			});
-			i_self.map = i_map;
-			i_self.run();
+				i_self.map = i_map;
+				i_self.run();
+			};
+
+			i_self.sprite.src =  "/source/resources/images/sprites.png";
 		},
-		draw : function() {
+		draw: function() {
 
 			var i_canvas = document.getElementById('canvas');
 			var i_self = this;
@@ -90,7 +82,7 @@ GameEngine = function() {
 
 							var i_objectBounds = i_object.getBounds();
 							
-							b_intersects = Game.intersects(i_playerBounds, i_objectBounds);
+							b_intersects = utils.intersects(i_playerBounds, i_objectBounds);
 
 							if (b_intersects && i_player.walk.length > 0) {
 
@@ -103,7 +95,7 @@ GameEngine = function() {
 								switch (s_key) {
 									case "a":
 										if (i_playerBounds.left <= i_objectBounds.right && i_objectBounds.right < i_playerBounds.right) {
-											i_player.x = i_objectBounds.right + 2 ;
+											i_player.x = i_objectBounds.right + 2;
 										}
 										break;
 									case "d":
@@ -133,7 +125,7 @@ GameEngine = function() {
 
 						var i_bombBounds = i_bomb.getBounds();
 							
-						b_intersects = Game.intersects(i_playerBounds, i_bombBounds);
+						b_intersects = utils.intersects(i_playerBounds, i_bombBounds);
 
 						if (b_intersects) {
 							if (i_bomb.velocity) {
@@ -149,7 +141,7 @@ GameEngine = function() {
 								switch (s_key) {
 									case "a":
 										if (i_playerBounds.left <= i_bombBounds.right && i_bombBounds.right < i_playerBounds.right) {
-											i_player.x = i_bombBounds.right + 2 ;
+											i_player.x = i_bombBounds.right + 2;
 										}
 										break;
 									case "d":
@@ -186,28 +178,28 @@ GameEngine = function() {
 								var i_objectBounds = i_object.getBounds();
 								var i_bombBounds = i_bomb.getBounds();
 
-								b_intersects = Game.intersects(i_objectBounds, i_bombBounds);
+								b_intersects = utils.intersects(i_objectBounds, i_bombBounds);
 								
-								if(b_intersects) {
-									switch(i_bomb.direction) {
+								if (b_intersects) {
+									switch (i_bomb.direction) {
 
-										case Direction.UP:
+										case direction.UP:
 											if (i_bombBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_bombBounds.top) {
 												i_bomb.y += 3;
 											}
 											break;
-										case Direction.DOWN:
+										case direction.DOWN:
 											if (i_bombBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_bombBounds.bottom) {
 												i_bomb.y = (i_objectBounds.top - (i_bomb.scale.height + 2));
 											}
 											break;
-										case Direction.LEFT:
+										case direction.LEFT:
 											if (i_bombBounds.left <= i_objectBounds.right && i_objectBounds.right < i_bombBounds.right) {
-												i_bomb.x = i_objectBounds.right + 2 ;
+												i_bomb.x = i_objectBounds.right + 2;
 											}
 										
 											break;
-										case Direction.RIGHT:
+										case direction.RIGHT:
 											if (i_bombBounds.right >= i_objectBounds.left && i_objectBounds.right > i_bombBounds.right) {
 												i_bomb.x = (i_objectBounds.left - i_bomb.scale.width) - 2;
 											}
@@ -226,32 +218,21 @@ GameEngine = function() {
 				}
 
 				//debug;
-				
 			});
 		},
 		clear: function() {
 			var i_canvas = document.getElementById('canvas');
-			
 		},
 		loadMap: function(s_file) {
 
-			var i_self = this;
-
-			if (s_file) {
-				Game.require(s_file, function() {
-					i_self.init();
-				});
-			}
-			else {
-				i_self.init();
-			}
+			i_self.init();
 		}, 
 		run: function() {
 
 			var i_engine = this;
 			i_engine.clear();
 			i_engine.draw();
-			i_engine.timer = setTimeout(function(){
+			i_engine.timer = setTimeout(function() {
 				i_engine.run();
 			}, 16);
 		},
@@ -262,3 +243,5 @@ GameEngine = function() {
 	});
 	return i_self;
 };
+
+module.exports = GameEngine;

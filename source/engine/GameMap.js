@@ -1,4 +1,10 @@
-GameMap = function() {
+"use strict";
+
+var Asset = require('./Asset');
+var BaseObject = require('./BaseObject');
+var Breakable = require('./Breakable');
+
+function GameMap() {
 
 	var i_self = this;
 	i_self = Object.assign(i_self, {
@@ -8,47 +14,20 @@ GameMap = function() {
 			WALL: 2
 		},
 		points: [],
-		level:[
-				[
-					"1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"
-				],
-				[
-					"1","S",".",".",".",".",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".","2",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".","2",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".","2","2","2","2","2",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".","2",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".","2",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".",".",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".",".",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".",".",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".",".",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1",".",".",".",".",".",".",".",".",".",".",".",".",".",".","1"
-				],
-				[
-					"1","1","1","1","1","1","1","1","1","1","1","1","1","1","1","1"
-				]
-
+		level: [
+			"1111111111111111".split(''),
+			"1S.............1".split(''),
+			"1....2.........1".split(''),
+			"1....2.........1".split(''),
+			"1..22222.......1".split(''),
+			"1....2.........1".split(''),
+			"1....2.........1".split(''),
+			"1..............1".split(''),
+			"1..............1".split(''),
+			"1..............1".split(''),
+			"1..............1".split(''),
+			"1..............1".split(''),
+			"1111111111111111".split('')
 		],
 		init: function(i_sprite) {
 
@@ -59,7 +38,7 @@ GameMap = function() {
 				a_values.forEach(function(s_value, x_index) {
 
 					var i_asset;
-					switch(s_value) {
+					switch (s_value) {
 						case "1":
 							i_asset = new Asset({
 								x: x_index * 48,
@@ -119,7 +98,6 @@ GameMap = function() {
 						a_obejcts.push(i_asset);
 					}
 				});
-				
 			});
 
 			i_self.objects = a_obejcts;
@@ -128,11 +106,11 @@ GameMap = function() {
 			i_self.level.forEach(function(a_values, y_index) {
 				a_values.forEach(function(s_value, x_index) {
 
-					switch(s_value) {
+					switch (s_value) {
 						case "S":
 							var i_place = new Asset({
 								x: x_index * 48,
-								y: y_index * 48,
+								y: y_index * 48
 							});
 							a_starts.push(i_place);
 							break;
@@ -157,7 +135,6 @@ GameMap = function() {
 							i_context.fillStyle = 'rgba(225,0,0,0.5)';
 							i_context.fillRect(i_object.x, i_object.y, i_object.scale.width, i_object.scale.height);
 						}
-						
 					});
 				}
 		}
@@ -165,3 +142,5 @@ GameMap = function() {
 
 		return i_self;
 };
+
+module.exports = GameMap;
