@@ -1,0 +1,19 @@
+{
+  "name": "bomberman",
+  "version": "1.0.0",
+  "description": "Bomberman in the web",
+  "main": "   ",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/dreadlord1981/bomberman.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^14.0.0"
+  }
+}

@@ -1,4 +1,12 @@
-Player = function() {
+"use strict";
+
+var utils = require('../utils');
+var state = require('./state.json');
+var direction = require('./direction.json');
+var Moveable = require('./Moveable');
+var Bomb = require('./Bomb');
+
+function Player() {
 
 	var i_self = this;
 	var o_config = arguments[0] || {};
@@ -9,7 +17,7 @@ Player = function() {
 		speed: 3,
 		velocity: 0,
 		MAX_SPEED: 3,
-		state: State.ALIVE,
+		state: state.ALIVE,
 		width: 16,
 		height: 20,
 		frame: null,
@@ -18,7 +26,7 @@ Player = function() {
 		buttons: [],
 		MAX_BOMBS: 8,
 		timers: {
-			frame: null,
+			frame: null
 		},
 		actions: {
 			down: {
@@ -149,7 +157,7 @@ Player = function() {
 			}
 		},
 		action: null,
-		direction: Direction.DOWN,
+		direction: direction.DOWN,
 		scale: {
 			width: 32,
 			height: 64
@@ -195,7 +203,7 @@ Player = function() {
 		getFrame: function(f_callback) {
 
 			var i_self  = this;
-			if (i_self.velocity || i_self.state == State.DYING) {
+			if (i_self.velocity || i_self.state == state.DYING) {
 				i_self.frameIndex++;
 				if (i_self.frameIndex >= i_self.action.frames.length) {
 					i_self.frameIndex = 0;
@@ -208,7 +216,6 @@ Player = function() {
 					i_self.getFrame(f_callback);
 				}, 125);
 			}
-			
 		},
 		initEvents: function() {
 
@@ -218,19 +225,19 @@ Player = function() {
 
 			var s_key = e.key.toLowerCase();
 
-				switch(s_key) {
+				switch (s_key) {
 					case "w":
 					case "s":
 					case "d":
 					case "a":
-						if (i_self.state != State.DYING) {
+						if (i_self.state != state.DYING) {
 							if (i_self.walk.length > 0) {
 								i_self.walk.pop();
 							}
 							if (i_self.walk.indexOf(s_key) < 0) {
 								i_self.walk.push(s_key);
 							}
-							i_self.state = State.MOVING;
+							i_self.state = state.MOVING;
 						}
 						
 						break;
@@ -252,7 +259,7 @@ Player = function() {
 				if (i_self.walk.indexOf(s_key) > -1) {
 					i_self.walk.splice(i_self.walk.indexOf(s_key), 1);
 				}
-				if (i_self.walk.length == 0 && i_self.state != State.DYING) {
+				if (i_self.walk.length == 0 && i_self.state != state.DYING) {
 					i_self.reset();
 				} 
 			});
@@ -261,13 +268,13 @@ Player = function() {
 
 			var i_self = this;
 
-			i_self.state = State.DYING;
-			i_self.direction = Direction.DYING;
+			i_self.state = state.DYING;
+			i_self.direction = direction.DYING;
 			i_self.doAction(function() {
 				i_self.x = 49;
 				i_self.y = 49;
-				i_self.state = State.IDEL;
-				i_self.direction = Direction.DOWN;
+				i_self.state = state.IDEL;
+				i_self.direction = direction.DOWN;
 				i_self.doAction();
 				i_self.reset();
 			});
@@ -282,8 +289,8 @@ Player = function() {
 		placeBomb: function() {
 
 			var i_self = this;
-			if (i_self.state != State.DYING && 
-				i_self.state != State.DEAD &&
+			if (i_self.state != state.DYING && 
+				i_self.state != state.DEAD &&
 				i_self.bombs.length <= i_self.MAX_BOMBS) {
 
 				var i_bounds = i_self.getBounds();
@@ -291,20 +298,20 @@ Player = function() {
 				var n_x = 0;
 				var n_y = 0;
 
-				switch(i_self.direction) {
-					case Direction.DOWN:
+				switch (i_self.direction) {
+					case direction.DOWN:
 						n_y = i_bounds.bottom - (i_self.height * 2);
 						n_x = i_bounds.left - (i_self.width / 2);
 						break;
-					case Direction.UP:
+					case direction.UP:
 						n_y = i_bounds.top - 16;
 						n_x = i_bounds.left - (i_self.width / 2);
 						break;
-					case Direction.LEFT:
+					case direction.LEFT:
 						n_y = i_bounds.top - (i_self.width / 4);
 						n_x = i_bounds.left - (i_self.scale.width / 2);
 						break;
-					case Direction.RIGHT:
+					case direction.RIGHT:
 						n_y = i_bounds.top - (i_self.width / 4);
 						n_x = i_bounds.right - i_self.scale.width;
 						break;
@@ -316,9 +323,9 @@ Player = function() {
 					sprite: i_self.sprite,
 					flameSize: 2
 				});
-				i_bomb.doTick(function(){
+				i_bomb.doTick(function() {
 					i_bomb.createFlames();
-					i_bomb.doExplode(function(){
+					i_bomb.doExplode(function() {
 						i_self.bombs.shift();
 					});
 				});
@@ -332,14 +339,14 @@ Player = function() {
 			clearTimeout(i_self.timers.frame);
 			i_self.frameIndex = 0;
 			i_self.walk = [];
-			i_self.state = State.IDEL;
+			i_self.state = state.IDEL;
 			i_self.oldDirection = i_self.direction;
 		},
 		update: function() {
 
 			var i_self = this;
 			var a_keys = i_self.walk;
-			if (i_self.state === State.MOVING) {
+			if (i_self.state === state.MOVING) {
 
 				if (a_keys.length) {
 
@@ -351,20 +358,20 @@ Player = function() {
 					}
 					
 					var i_oldDirection = i_self.direction;
-					var s_lastkey = a_keys.slice(a_keys.length-1).pop();
+					var s_lastkey = a_keys.slice(a_keys.length - 1).pop();
 
-					switch(s_lastkey) {
+					switch (s_lastkey) {
 						case "a":
-							i_self.direction = Direction.LEFT;
+							i_self.direction = direction.LEFT;
 							break;
 						case "d":
-							i_self.direction = Direction.RIGHT;
+							i_self.direction = direction.RIGHT;
 							break;
 						case "w":
-							i_self.direction = Direction.UP;
+							i_self.direction = direction.UP;
 							break;
 						case "s":
-							i_self.direction = Direction.DOWN;
+							i_self.direction = direction.DOWN;
 							break;
 					}
 					if (i_self.oldDirection || i_oldDirection !== i_self.direction) {
@@ -372,12 +379,12 @@ Player = function() {
 						delete i_self.oldDirection;
 					}
 
-					a_keys.forEach(function(s_key){
-						switch(s_key) {
+					a_keys.forEach(function(s_key) {
+						switch (s_key) {
 							case "a":
 								i_self.x -= i_self.velocity;
 								break;
-							case"d":
+							case "d":
 								i_self.x += i_self.velocity;
 								break;
 							case "w":
@@ -424,7 +431,7 @@ Player = function() {
 
 						if (i_bomb.passable) {
 							var i_bombBounds = i_bomb.getBounds();
-							var b_intersects = Game.intersects(i_playerBounds, i_bombBounds);
+							var b_intersects = utils.intersects(i_playerBounds, i_bombBounds);
 							if (!b_intersects) {
 								i_bomb.passable = false;
 							}
@@ -452,24 +459,24 @@ Player = function() {
 							i_context.fillStyle = 'rgba(0,151,203,0.5)';
 
 							//debug for flames to see bounds...
-							switch(i_flame.direction) {
-								case Direction.LEFT:
+							switch (i_flame.direction) {
+								case direction.LEFT:
 									//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width, i_flame.scale.height - 32);
 									break;
-								case Direction.RIGHT:
+								case direction.RIGHT:
 									//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width, i_flame.scale.height - 32);
 									break;
-								case Direction.UP:
+								case direction.UP:
 									//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width - 32, i_flame.scale.height);
 									break;
-								case Direction.DOWN:
+								case direction.DOWN:
 									//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width - 32, i_flame.scale.height);
 									break;
 							}
 
-							var b_intersects = Game.intersects(i_playerBounds, i_flameBounds);
+							var b_intersects = utils.intersects(i_playerBounds, i_flameBounds);
 
-							if (b_intersects && i_self.state != State.DYING) {
+							if (b_intersects && i_self.state != state.DYING) {
 								i_self.doDie();
 							}
 
@@ -477,19 +484,17 @@ Player = function() {
 								if (i_bomb.flames.length == 0) {
 									var i_bounds = i_bomb.getBounds();
 
-									var b_intersects = Game.intersects(i_bounds, i_flameBounds);
+									var b_intersects = utils.intersects(i_bounds, i_flameBounds);
 
 									if (b_intersects) {
 										i_bomb.triggerExplode(function() {
 											i_self.bombs.shift();
-										})
+										});
 									}
 								}
-							})
+							});
 						}
-						
 					});
-					
 				});
 
 				i_context.drawImage(
@@ -507,7 +512,7 @@ Player = function() {
 				var o_bounds = i_self.getBounds();
 				i_context.fillStyle = 'rgba(39,235,133,0.5)';
 
-				i_context.fillRect(o_bounds.left, o_bounds.top, i_self.scale.width, i_self.scale.height -20);
+				i_context.fillRect(o_bounds.left, o_bounds.top, i_self.scale.width, i_self.scale.height - 20);
 			}
 		}
 	});
@@ -518,4 +523,6 @@ Player = function() {
 };
 
 Player.prototype = Object.create(Moveable.prototype);
-Player.prototype.constructor = Player
+Player.prototype.constructor = Player;
+
+module.exports = Player;

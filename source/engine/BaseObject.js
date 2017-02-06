@@ -1,11 +1,13 @@
-BaseObject = function() {
+"use strict";
+
+var BaseObject = function() {
 
 	var i_self = this;
 	var a_arguments = Array.from(arguments);
 	a_arguments.forEach(function(argument) {
 		if (typeof argument === 'object') {
 
-			for( key in argument) {
+			for (var key in argument) {
 				if (argument.hasOwnProperty(key)) {
 					i_self[key] = argument[key];
 				}
@@ -16,5 +18,7 @@ BaseObject = function() {
 		}
 	});
 
-	return  i_self;
+	return i_self;
 };
+
+module.exports = BaseObject;
