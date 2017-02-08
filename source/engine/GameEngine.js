@@ -193,23 +193,23 @@ Object.assign(GameEngine.prototype, {
 
 									case direction.UP:
 										if (i_bombBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_bombBounds.top) {
-											i_bomb.y += 3;
+											i_bomb.y = (i_objectBounds.bottom - 6);
 										}
 										break;
 									case direction.DOWN:
 										if (i_bombBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_bombBounds.bottom) {
-											i_bomb.y = (i_objectBounds.top - (i_bomb.scale.height + 2));
+											i_bomb.y = (i_objectBounds.top - (i_bomb.scale.height - 8));
 										}
 										break;
 									case direction.LEFT:
 										if (i_bombBounds.left <= i_objectBounds.right && i_objectBounds.right < i_bombBounds.right) {
-											i_bomb.x = i_objectBounds.right + 2;
+											i_bomb.x = (i_objectBounds.right - 8) + 1;
 										}
 
 										break;
 									case direction.RIGHT:
 										if (i_bombBounds.right >= i_objectBounds.left && i_objectBounds.right > i_bombBounds.right) {
-											i_bomb.x = (i_objectBounds.left - i_bomb.scale.width) - 2;
+											i_bomb.x = (i_objectBounds.left - (i_bomb.scale.width -8)) - 1;
 										}
 										break;
 								}

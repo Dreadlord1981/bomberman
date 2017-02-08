@@ -336,9 +336,7 @@ Object.assign(Player.prototype, {
 					});
 					i_bomb.doTick(function() {
 						i_bomb.createFlames();
-						i_bomb.doExplode(function() {
-							i_self.bombs.shift();
-						});
+						i_bomb.doExplode(function() {});
 					});
 					i_self.bombs.push(i_bomb);
 				}
@@ -426,6 +424,19 @@ Object.assign(Player.prototype, {
 			var i_context = i_canvas.getContext('2d');
 			var i_playerBounds = i_self.getBounds();
 
+			var n_remove = 0;
+
+			i_self.bombs.forEach(function(i_bomb, n_index) {
+				if (i_bomb.exploded) {
+					n_remove++;
+				}
+			});
+
+			if (n_remove) {
+				i_self.bombs.splice(0, n_remove);
+			}
+			
+
 			i_self.bombs.forEach(function(i_bomb) {
 				if (i_bomb.frame) {
 					i_context.drawImage(
@@ -449,7 +460,7 @@ Object.assign(Player.prototype, {
 					}
 					//i_context.fillStyle = 'rgba(0,151,203,0.5)';
 
-					i_context.fillRect(i_bombBounds.left, i_bombBounds.top, i_bomb.scale.width, i_bomb.scale.height);
+					i_context.fillRect(i_bombBounds.left, i_bombBounds.top, i_bomb.scale.width -10, i_bomb.scale.height - 16);
 				}
 				i_bomb.flames.forEach(function(i_flame) {
 					if (i_flame.frame) {
@@ -498,9 +509,7 @@ Object.assign(Player.prototype, {
 								var b_intersects = utils.intersects(i_bounds, i_flameBounds);
 
 								if (b_intersects) {
-									i_bomb.triggerExplode(function() {
-										i_self.bombs.shift();
-									});
+									i_bomb.triggerExplode(function() {});
 								}
 							}
 						});

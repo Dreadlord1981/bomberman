@@ -115,6 +115,7 @@ Object.assign(Bomb.prototype, {
 		}
 		else {
 			if (f_callback) {
+				i_self.exploded = true;
 				f_callback();
 			}
 		}
@@ -123,7 +124,7 @@ Object.assign(Bomb.prototype, {
 
 		var i_self = this;
 		i_self.ticks++;
-		if (i_self.ticks <= 120) {
+		if (i_self.ticks <= 30) {
 			i_self.timer = setTimeout(function() {
 				i_self.frameIndex++;
 				if (i_self.frameIndex >= i_self.frames.ticks.length) {
@@ -139,6 +140,17 @@ Object.assign(Bomb.prototype, {
 				f_callback();
 			}
 		}
+	},
+	getBounds: function() {
+		var i_self = this;
+
+		var o_bounds = {
+			left: i_self.x + 6,
+			top: i_self.y + 6,
+			right: i_self.x + (i_self.scale.width - 10),
+			bottom: i_self.y + (i_self.scale.height - 12)
+		};
+		return o_bounds;
 	},
 	update: function() {
 
