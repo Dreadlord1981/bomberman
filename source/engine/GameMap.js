@@ -11,21 +11,22 @@ function GameMap() {
 
 		TYPE: {
 			GROUND: 1,
-			WALL: 2
+			WALL: 2,
+			SOLID: 3
 		},
 		points: [],
 		level: [
 			"1111111111111111".split(''),
-			"1S.............1".split(''),
-			"1....2.........1".split(''),
-			"1....2.........1".split(''),
-			"1..22222.......1".split(''),
-			"1....2.........1".split(''),
-			"1....2.........1".split(''),
-			"1..............1".split(''),
-			"1..............1".split(''),
-			"1..............1".split(''),
-			"1..............1".split(''),
+			"1S........1....1".split(''),
+			"1....2....1....1".split(''),
+			"1....2....1....1".split(''),
+			"1..22222...2...1".split(''),
+			"1....2.....2...1".split(''),
+			"1....2..12.2...1".split(''),
+			"1..........2...1".split(''),
+			"1.......222222.1".split(''),
+			"1..........2...1".split(''),
+			"1..........2...1".split(''),
 			"1..............1".split(''),
 			"1111111111111111".split('')
 		]
@@ -61,7 +62,7 @@ Object.assign(GameMap.prototype, {
 								x: 8,
 								y: 328
 							},
-							type: i_self.TYPE.WALL,
+							type: i_self.TYPE.SOLID,
 							sprite: i_sprite
 						});
 						break;
@@ -84,7 +85,7 @@ Object.assign(GameMap.prototype, {
 						});
 						break;
 					default:
-						i_asset = new BaseObject({
+						i_asset = new Asset({
 							x: x_index * 48,
 							y: y_index * 48,
 							width: 8,
@@ -133,18 +134,23 @@ Object.assign(GameMap.prototype, {
 
 		var i_canvas = document.getElementById('canvas');
 		var i_context = i_canvas.getContext('2d');
-		if (i_canvas.getContext) {
-			var i_context = i_canvas.getContext('2d');
-			i_self.objects.forEach(function(i_object) {
-				i_context.drawImage(i_object.sprite, i_object.texture.x, i_object.texture.y, i_object.width, i_object.height, i_object.x, i_object.y, i_object.scale.width, i_object.scale.height);
 
-				//debug;
+		i_self.objects.forEach(function(i_object) {
+
+			if (i_object.type != i_self.TYPE.GROUND) {
+				i_context.drawImage(i_object.sprite, i_object.texture.x, i_object.texture.y, i_object.width, i_object.height, i_object.x, i_object.y, i_object.scale.width, i_object.scale.height);
+			}
+			else {
 				if (i_object.getBounds) {
-					i_context.fillStyle = 'rgba(225,0,0,0.5)';
+
+					i_context.fillStyle = "rgb(32,96,0)";
+
+					//i_context.fillStyle = 'rgba(225,0,0,0.5)'; <--- debug;
+
 					i_context.fillRect(i_object.x, i_object.y, i_object.scale.width, i_object.scale.height);
 				}
-			});
-		}
+			}
+		});
 	}
 });
 

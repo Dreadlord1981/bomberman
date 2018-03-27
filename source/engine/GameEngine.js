@@ -5,14 +5,17 @@ var BaseObject = require('./BaseObject');
 var direction = require('./direction.json');
 var GameMap = require('./GameMap');
 var Player = require('./Player');
+var state = require('./state.json');
 
 function GameEngine() {
 
 	var i_self = this;
+
 	i_self = Object.assign(i_self, {
 		players: [],
 		timer: null,
 		sprite: null,
+		states: state
 	});
 };
 
@@ -48,10 +51,13 @@ Object.assign(GameEngine.prototype, {
 	draw: function() {
 
 		var i_canvas = document.getElementById('canvas');
-		var i_self = this;
 
+		var i_self = this;
 		i_self.map.draw();
+
 		var o_types = i_self.map.TYPE;
+		var o_states = i_self.states;
+
 		var a_bombs = [];
 
 		i_self.players.forEach(function(i_player) {
@@ -86,42 +92,39 @@ Object.assign(GameEngine.prototype, {
 
 				if (i_object.type && i_object.type != o_types.GROUND) {
 
-					if (i_object.getBounds) {
+					var i_objectBounds = i_object.getBounds();
 
-						var i_objectBounds = i_object.getBounds();
+					b_intersects = utils.intersects(i_playerBounds, i_objectBounds);
 
-						b_intersects = utils.intersects(i_playerBounds, i_objectBounds);
+					if (b_intersects && i_player.walk.length > 0) {
 
-						if (b_intersects && i_player.walk.length > 0) {
+						var s_key = i_player.walk.shift();
 
-							var s_key = i_player.walk.shift();
+						a_done.push(s_key);
 
-							a_done.push(s_key);
+						i_playerBounds = i_player.getBounds();
 
-							i_playerBounds = i_player.getBounds();
-
-							switch (s_key) {
-								case "a":
-									if (i_playerBounds.left <= i_objectBounds.right && i_objectBounds.right < i_playerBounds.right) {
-										i_player.x = i_objectBounds.right + 2;
-									}
-									break;
-								case "d":
-									if (i_playerBounds.right >= i_objectBounds.left && i_objectBounds.right > i_playerBounds.right) {
-										i_player.x = (i_objectBounds.left - i_player.scale.width) - 2;
-									}
-									break;
-								case "w":
-									if (i_playerBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_playerBounds.top) {
-										i_player.y += 3;
-									}
-									break;
-								case "s":
-									if (i_playerBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_playerBounds.bottom) {
-										i_player.y = (i_objectBounds.top - (i_player.scale.height + 2));
-									}
-									break;
-							}
+						switch (s_key) {
+							case "a":
+								if (i_playerBounds.left <= i_objectBounds.right && i_objectBounds.right < i_playerBounds.right) {
+									i_player.x = i_objectBounds.right + 2;
+								}
+								break;
+							case "d":
+								if (i_playerBounds.right >= i_objectBounds.left && i_objectBounds.right > i_playerBounds.right) {
+									i_player.x = (i_objectBounds.left - i_player.scale.width) - 2;
+								}
+								break;
+							case "w":
+								if (i_playerBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_playerBounds.top) {
+									i_player.y += 3;
+								}
+								break;
+							case "s":
+								if (i_playerBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_playerBounds.bottom) {
+									i_player.y = (i_objectBounds.top - (i_player.scale.height + 2));
+								}
+								break;
 						}
 					}
 				}
@@ -219,6 +222,56 @@ Object.assign(GameEngine.prototype, {
 				}
 			});
 
+			a_bombs.forEach(function(i_bomb){
+
+				if (i_bomb.flames.length > 0) {
+
+					var a_flames = i_bomb.flames;
+
+					a_flames.forEach(function(i_flame, n_index) {
+
+						var a_search = i_bomb.flames;
+
+						if (!i_flame.intersects) {
+							a_objects.forEach(function(i_object) {
+								if (i_object.type && i_object.type != o_types.GROUND) {
+									var i_objectBounds = i_object.getBounds();
+									var i_flameBounds = i_flame.getBounds();
+
+									b_intersects = utils.intersects(i_objectBounds, i_flameBounds);
+
+									if (b_intersects) {
+
+										var n_direction = i_flame.direction;
+										i_flame.intersects = true;
+
+										if (i_object.type != o_types.SOLID) {
+											i_object.type = o_types.GROUND;
+										}
+
+										a_search.forEach(function(i_flame, n_result) {
+											if(i_flame.direction == n_direction && n_index > n_result) {
+												i_flame.intersects = true;
+											}
+										});
+									}
+								}
+							});
+						}
+					});
+
+					var n_index = 0;
+
+					i_bomb.flames.forEach(function(i_flame) {
+						if (i_flame.intersects) {
+							i_bomb.flames.splice(n_index, 1);
+							n_index--;
+						}
+						n_index++;
+					});
+				}
+			});
+
 			i_player.draw();
 			i_player.buttons = [];
 			if (i_player.walk.length == 0) {
@@ -230,6 +283,8 @@ Object.assign(GameEngine.prototype, {
 	},
 	clear: function() {
 		var i_canvas = document.getElementById('canvas');
+		var i_context = i_canvas.getContext('2d');
+		i_context.clearRect(0, 0, i_canvas.width, i_canvas.height);
 	},
 	loadMap: function(s_file) {
 

@@ -13,7 +13,7 @@ function Player() {
 
 	o_config = Object.assign(o_config, {
 		x: 48,
-		y: 48,	
+		y: 48,
 		speed: 3,
 		velocity: 0,
 		MAX_SPEED: 3,
@@ -48,7 +48,7 @@ function Player() {
 						x: 56,
 						y: 12
 					}
-					
+
 				]
 			},
 			up: {
@@ -272,7 +272,7 @@ Object.assign(Player.prototype, {
 			}
 			if (i_self.walk.length == 0 && i_self.state != state.DYING) {
 				i_self.reset();
-			} 
+			}
 		});
 	},
 	doDie: function() {
@@ -300,7 +300,7 @@ Object.assign(Player.prototype, {
 	placeBomb: function() {
 
 		var i_self = this;
-		if (i_self.state != state.DYING && 
+		if (i_self.state != state.DYING &&
 			i_self.state != state.DEAD &&
 				i_self.bombs.length <= i_self.MAX_BOMBS) {
 
@@ -435,7 +435,7 @@ Object.assign(Player.prototype, {
 			if (n_remove) {
 				i_self.bombs.splice(0, n_remove);
 			}
-			
+
 
 			i_self.bombs.forEach(function(i_bomb) {
 				if (i_bomb.frame) {
@@ -460,7 +460,7 @@ Object.assign(Player.prototype, {
 					}
 					//i_context.fillStyle = 'rgba(0,151,203,0.5)';
 
-					i_context.fillRect(i_bombBounds.left, i_bombBounds.top, i_bomb.scale.width -10, i_bomb.scale.height - 16);
+					//i_context.fillRect(i_bombBounds.left, i_bombBounds.top, i_bomb.scale.width -10, i_bomb.scale.height - 16);
 				}
 				i_bomb.flames.forEach(function(i_flame) {
 					if (i_flame.frame) {
@@ -530,9 +530,9 @@ Object.assign(Player.prototype, {
 			);
 			//debug;
 			var o_bounds = i_self.getBounds();
-			i_context.fillStyle = 'rgba(39,235,133,0.5)';
+			//i_context.fillStyle = 'rgba(39,235,133,0.5)';
 
-			i_context.fillRect(o_bounds.left, o_bounds.top, i_self.scale.width, i_self.scale.height - 20);
+			//i_context.fillRect(o_bounds.left, o_bounds.top, i_self.scale.width, i_self.scale.height - 20);
 		}
 	}
 });
