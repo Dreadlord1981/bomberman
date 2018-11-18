@@ -15,6 +15,7 @@ var Asset = function() {
 };
 
 Asset.prototype = Object.create(BaseObject.prototype);
+
 Object.assign(Asset.prototype, {
 	constructor: Asset,
 	init: function() {},
@@ -28,7 +29,8 @@ Object.assign(Asset.prototype, {
 			bottom: i_self.y + i_self.scale.height
 		};
 		return o_bounds;
-	}
+	},
+	checkCollition: function() {}
 });
 
 module.exports = Asset;

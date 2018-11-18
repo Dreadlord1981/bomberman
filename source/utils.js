@@ -11,6 +11,10 @@ function intersects(a, b) {
 	return b_intersects;
 }
 
+function emptyFn (){};
+
 module.exports = {
 	intersects: intersects
 };
+
+

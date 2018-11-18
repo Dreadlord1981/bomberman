@@ -1,11 +1,11 @@
 "use strict";
 
-var utils = require('../utils');
-var BaseObject = require('./BaseObject');
-var direction = require('./direction.json');
-var GameMap = require('./GameMap');
-var Player = require('./Player');
-var state = require('./state.json');
+var utils = require("../utils");
+var BaseObject = require("./BaseObject");
+var direction = require("./direction.json");
+var GameMap = require("./GameMap");
+var Player = require("./Player");
+var state = require("./state.json");
 
 function GameEngine() {
 
@@ -23,16 +23,22 @@ GameEngine.prototype = Object.create(BaseObject.prototype);
 
 Object.assign(GameEngine.prototype, {
 	constructor: GameEngine,
+
 	init: function() {
 
 		var i_self = this;
 		i_self.sprite = new Image();
 
 		i_self.sprite.onload = function() {
+
 			var i_map = new GameMap();
+
 			i_map.init(i_self.sprite);
 
+			var i_camera = i_map.CAMERA;
+
 			var a_spawn = i_map.points;
+
 			a_spawn.forEach(function(i_place) {
 
 				var i_player = new Player({
@@ -42,37 +48,51 @@ Object.assign(GameEngine.prototype, {
 				i_player.initialize(i_self.sprite);
 				i_self.players.push(i_player);
 			});
+
+			 i_camera.setFollow(i_self.players[0]);
+
 			i_self.map = i_map;
 			i_self.run();
 		};
 
 		i_self.sprite.src =  "/source/resources/images/sprites.png";
 	},
+
 	draw: function() {
 
-		var i_canvas = document.getElementById('canvas');
+		var i_canvas = document.getElementById("canvas");
+		var i_context = i_canvas.getContext("2d");
 
 		var i_self = this;
-		i_self.map.draw();
+		
+		var i_map = i_self.map;
+		var i_camera = i_map.CAMERA;
 
-		var o_types = i_self.map.TYPE;
+		var o_types = i_map.TYPE;
+		var a_objects = i_map.objects;
 		var o_states = i_self.states;
+		var a_playes = i_self.players;
 
 		var a_bombs = [];
 
-		i_self.players.forEach(function(i_player) {
+		a_playes.forEach(function(i_player) {
 
 			var a_slice = i_player.bombs.slice();
 			a_bombs = a_bombs.concat(a_slice);
 		});
 
-		i_self.players.forEach(function(i_player) {
+		i_map.drawGround(i_context);
+		i_map.drawSolids(i_context);
+		i_map.drawWalls(i_context);
+
+		i_camera.update();
+
+		a_playes.forEach(function(i_player) {
 
 			i_player.update();
+
 			var i_playerBounds = i_player.getBounds();
 			var b_intersects = false;
-			var a_done = [];
-			var a_objects = i_self.map.objects;
 
 			if (i_player.x < 0) {
 				i_player.x = 0;
@@ -88,208 +108,41 @@ Object.assign(GameEngine.prototype, {
 				i_player.y = i_canvas.height - i_player.scale.height;
 			}
 
-			a_objects.forEach(function(i_object) {
+			i_player.checkCollition(a_objects, a_bombs, o_types);
 
-				if (i_object.type && i_object.type != o_types.GROUND) {
-
-					var i_objectBounds = i_object.getBounds();
-
-					b_intersects = utils.intersects(i_playerBounds, i_objectBounds);
-
-					if (b_intersects && i_player.walk.length > 0) {
-
-						var s_key = i_player.walk.shift();
-
-						a_done.push(s_key);
-
-						i_playerBounds = i_player.getBounds();
-
-						switch (s_key) {
-							case "a":
-								if (i_playerBounds.left <= i_objectBounds.right && i_objectBounds.right < i_playerBounds.right) {
-									i_player.x = i_objectBounds.right + 2;
-								}
-								break;
-							case "d":
-								if (i_playerBounds.right >= i_objectBounds.left && i_objectBounds.right > i_playerBounds.right) {
-									i_player.x = (i_objectBounds.left - i_player.scale.width) - 2;
-								}
-								break;
-							case "w":
-								if (i_playerBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_playerBounds.top) {
-									i_player.y += 3;
-								}
-								break;
-							case "s":
-								if (i_playerBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_playerBounds.bottom) {
-									i_player.y = (i_objectBounds.top - (i_player.scale.height + 2));
-								}
-								break;
-						}
-					}
-				}
-			});
-
-			a_bombs.forEach(function(i_bomb) {
-				i_bomb.update();
-				if (!i_bomb.passable) {
-
-					var i_bombBounds = i_bomb.getBounds();
-
-					b_intersects = utils.intersects(i_playerBounds, i_bombBounds);
-
-					if (b_intersects) {
-						if (i_bomb.velocity) {
-							i_bomb.velocity = 0;
-						}
-						if (i_player.walk.length > 0) {
-							var s_key = i_player.walk.shift();
-
-							a_done.push(s_key);
-
-							i_playerBounds = i_player.getBounds();
-
-							switch (s_key) {
-								case "a":
-									if (i_playerBounds.left <= i_bombBounds.right && i_bombBounds.right < i_playerBounds.right) {
-										i_player.x = i_bombBounds.right + 2;
-									}
-									break;
-								case "d":
-									if (i_playerBounds.right >= i_bombBounds.left && i_bombBounds.right > i_playerBounds.right) {
-										i_player.x = (i_bombBounds.left - i_player.scale.width) - 2;
-									}
-									break;
-								case "w":
-									if (i_playerBounds.top <= i_bombBounds.bottom && i_bombBounds.top < i_playerBounds.top) {
-										i_player.y += 3;
-									}
-									break;
-								case "s":
-									if (i_playerBounds.bottom >= i_bombBounds.top && i_bombBounds.bottom > i_playerBounds.bottom) {
-										i_player.y = (i_bombBounds.top - (i_player.scale.height + 2));
-									}
-									break;
-							}
-						}
-						if (i_player.buttons.length > 0) {
-							if (i_bomb.velocity == 0) {
-								i_player.kickBomb(i_bomb);
-							}
-						}
-					}
-				}
-			});
-
-			a_bombs.forEach(function(i_bomb) {
-
-				if (!i_bomb.passable) {
-					a_objects.forEach(function(i_object) {
-						if (i_object.type && i_object.type != o_types.GROUND) {
-							var i_objectBounds = i_object.getBounds();
-							var i_bombBounds = i_bomb.getBounds();
-
-							b_intersects = utils.intersects(i_objectBounds, i_bombBounds);
-
-							if (b_intersects) {
-								switch (i_bomb.direction) {
-
-									case direction.UP:
-										if (i_bombBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_bombBounds.top) {
-											i_bomb.y = (i_objectBounds.bottom - 6);
-										}
-										break;
-									case direction.DOWN:
-										if (i_bombBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_bombBounds.bottom) {
-											i_bomb.y = (i_objectBounds.top - (i_bomb.scale.height - 8));
-										}
-										break;
-									case direction.LEFT:
-										if (i_bombBounds.left <= i_objectBounds.right && i_objectBounds.right < i_bombBounds.right) {
-											i_bomb.x = (i_objectBounds.right - 8) + 1;
-										}
-
-										break;
-									case direction.RIGHT:
-										if (i_bombBounds.right >= i_objectBounds.left && i_objectBounds.right > i_bombBounds.right) {
-											i_bomb.x = (i_objectBounds.left - (i_bomb.scale.width -8)) - 1;
-										}
-										break;
-								}
-							}
-						}
-					});
-				}
-			});
-
-			a_bombs.forEach(function(i_bomb){
-
-				if (i_bomb.flames.length > 0) {
-
-					var a_flames = i_bomb.flames;
-
-					a_flames.forEach(function(i_flame, n_index) {
-
-						var a_search = i_bomb.flames;
-
-						if (!i_flame.intersects) {
-							a_objects.forEach(function(i_object) {
-								if (i_object.type && i_object.type != o_types.GROUND) {
-									var i_objectBounds = i_object.getBounds();
-									var i_flameBounds = i_flame.getBounds();
-
-									b_intersects = utils.intersects(i_objectBounds, i_flameBounds);
-
-									if (b_intersects) {
-
-										var n_direction = i_flame.direction;
-										i_flame.intersects = true;
-
-										if (i_object.type != o_types.SOLID) {
-											i_object.type = o_types.GROUND;
-										}
-
-										a_search.forEach(function(i_flame, n_result) {
-											if(i_flame.direction == n_direction && n_index > n_result) {
-												i_flame.intersects = true;
-											}
-										});
-									}
-								}
-							});
-						}
-					});
-
-					var n_index = 0;
-
-					i_bomb.flames.forEach(function(i_flame) {
-						if (i_flame.intersects) {
-							i_bomb.flames.splice(n_index, 1);
-							n_index--;
-						}
-						n_index++;
-					});
-				}
-			});
-
-			i_player.draw();
-			i_player.buttons = [];
-			if (i_player.walk.length == 0) {
-				i_player.walk = a_done;
-			}
-
+			i_player.draw(i_context, i_camera);
 			//debug;
 		});
+
+		a_bombs.forEach(function(i_bomb) {
+
+			i_bomb.update(a_playes);
+			i_bomb.checkCollition(a_objects, o_types);
+
+			if (i_bomb.exploding) {
+				i_bomb.checkFlamesCollition(a_playes, a_bombs, a_objects, o_types);
+			}
+
+			i_bomb.draw(i_context, i_camera);
+
+		});
+
+		
 	},
+
 	clear: function() {
-		var i_canvas = document.getElementById('canvas');
-		var i_context = i_canvas.getContext('2d');
+
+		var i_canvas = document.getElementById("canvas");
+		var i_context = i_canvas.getContext("2d");
+
 		i_context.clearRect(0, 0, i_canvas.width, i_canvas.height);
 	},
+
 	loadMap: function(s_file) {
 
 		this.init();
 	},
+
 	run: function() {
 
 		var i_engine = this;
@@ -299,10 +152,11 @@ Object.assign(GameEngine.prototype, {
 			i_engine.run();
 		}, 16);
 	},
+
 	stop: function() {
 
-		clearTimeout(this.timer);;
+		clearTimeout(this.timer);
 	}
 });
 
-	module.exports = GameEngine;
+module.exports = GameEngine;

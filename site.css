@@ -1,0 +1,65 @@
+body {
+	background-color: black;
+	height: 100vh;
+	margin: 0px auto;
+}
+
+.canvas {
+	left: 50%;
+}
+
+.sidebar {
+	grid-area: sidebar;
+	border-right: 1px solid black;}
+
+.content {
+	grid-area: content;
+	position: relative;
+}
+
+.header {
+	grid-area: header;
+	border-bottom: 1px solid black;
+}
+
+.footer {
+	grid-area: footer;
+	border-top: 1px solid black;
+}
+
+.wrapper {
+
+	background-color: white;
+	width: 90%;
+	height: 90%;
+	margin: 0;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+
+	display: grid;
+	grid-template-areas:
+						"header  header"
+						"sidebar content"
+						"footer  footer";
+	grid-template-rows: 10% 1fr 10%;
+  	grid-template-columns: 15% 1fr;
+}
+
+.screen {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+}
+
+.box {
+  font-size: 150%;
+}
+
+.header,
+.footer {
+  background-color: #999;
+}

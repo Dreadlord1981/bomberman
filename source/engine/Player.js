@@ -1,10 +1,10 @@
 "use strict";
 
-var utils = require('../utils');
-var state = require('./state.json');
-var direction = require('./direction.json');
-var Moveable = require('./Moveable');
-var Bomb = require('./Bomb');
+var utils = require("../utils");
+var state = require("./state.json");
+var direction = require("./direction.json");
+var Moveable = require("./Moveable");
+var Bomb = require("./Bomb");
 
 function Player() {
 
@@ -167,9 +167,10 @@ function Player() {
 	Moveable.call(i_self, o_config);
 
 	return i_self;
-};
+}
 
 Player.prototype = Object.create(Moveable.prototype);
+
 Object.assign(Player.prototype, {
 	constructor: Player,
 
@@ -181,6 +182,7 @@ Object.assign(Player.prototype, {
 		i_self.doAction();
 		i_self.reset();
 	},
+
 	getBounds: function() {
 
 		var i_self = this;
@@ -193,6 +195,7 @@ Object.assign(Player.prototype, {
 		};
 		return o_bounds;
 	},
+
 	doAction: function(f_callback) {
 
 		var i_self = this;
@@ -211,6 +214,7 @@ Object.assign(Player.prototype, {
 
 		i_self.getFrame(f_callback);
 	},
+
 	getFrame: function(f_callback) {
 
 		var i_self  = this;
@@ -228,6 +232,7 @@ Object.assign(Player.prototype, {
 			}, 125);
 		}
 	},
+
 	initEvents: function() {
 
 		var i_self = this;
@@ -270,11 +275,12 @@ Object.assign(Player.prototype, {
 			if (i_self.walk.indexOf(s_key) > -1) {
 				i_self.walk.splice(i_self.walk.indexOf(s_key), 1);
 			}
-			if (i_self.walk.length == 0 && i_self.state != state.DYING) {
+			if (i_self.walk.length === 0 && i_self.state != state.DYING) {
 				i_self.reset();
 			}
 		});
 	},
+
 	doDie: function() {
 
 		var i_self = this;
@@ -290,6 +296,7 @@ Object.assign(Player.prototype, {
 			i_self.reset();
 		});
 	},
+
 	kickBomb: function(i_bomb) {
 
 		var i_self = this;
@@ -297,6 +304,7 @@ Object.assign(Player.prototype, {
 		i_bomb.velocity = 5;
 		i_bomb.direction = i_self.direction;
 	},
+
 	placeBomb: function() {
 
 		var i_self = this;
@@ -332,15 +340,147 @@ Object.assign(Player.prototype, {
 						x: n_x,
 						y: n_y,
 						sprite: i_self.sprite,
-						flameSize: 2
+						flameSize: 1
 					});
+
 					i_bomb.doTick(function() {
-						i_bomb.createFlames();
-						i_bomb.doExplode(function() {});
+						i_bomb.triggerExplode();
 					});
+
 					i_self.bombs.push(i_bomb);
 				}
 	},
+
+	checkCollition: function(a_objects, a_bombs,  o_types) {
+
+		var i_self = this;
+		var i_playerBounds = i_self.getBounds();
+
+		var a_done = [];
+		var a_walk = i_self.walk.slice();
+		var a_buttons = i_self.buttons.slice();
+
+		a_objects.forEach(function(i_object) {
+
+			if (i_object.type && i_object.type != o_types.GROUND) {
+
+				var i_objectBounds = i_object.getBounds();
+
+				var b_intersects = utils.intersects(i_playerBounds, i_objectBounds);
+
+				if (b_intersects && a_walk.length > 0) {
+
+					var s_key = a_walk.shift();
+
+					i_playerBounds = i_self.getBounds();
+
+					switch (s_key) {
+						case "a":
+							if (i_playerBounds.left <= i_objectBounds.right && i_objectBounds.right < i_playerBounds.right) {
+								i_self.x = i_objectBounds.right + 2;
+							}
+							break;
+						case "d":
+							if (i_playerBounds.right >= i_objectBounds.left && i_objectBounds.right > i_playerBounds.right) {
+								i_self.x = (i_objectBounds.left - i_self.scale.width) - 2;
+							}
+							break;
+						case "w":
+							if (i_playerBounds.top <= i_objectBounds.bottom && i_objectBounds.top < i_playerBounds.top) {
+								i_self.y += 3;
+							}
+							break;
+						case "s":
+							if (i_playerBounds.bottom >= i_objectBounds.top && i_objectBounds.bottom > i_playerBounds.bottom) {
+								i_self.y = (i_objectBounds.top - (i_self.scale.height + 2));
+							}
+							break;
+					}
+
+					a_done.push(s_key);
+				}
+			}
+		});
+
+		a_bombs.forEach(function(i_bomb) {
+
+			if (!i_bomb.passable) {
+
+				var i_bombBounds = i_bomb.getActiveArea();
+
+				var i_playerBounds = i_self.getBounds();
+
+				var b_intersects = utils.intersects(i_playerBounds, i_bombBounds);
+
+				if (b_intersects) {
+
+					var s_key = a_buttons.shift();
+
+					switch (s_key) {
+						case "h":
+							i_self.kickBomb(i_bomb);
+							i_bomb.update();
+							break;
+					}
+				}
+			}
+		});
+
+		
+
+		a_bombs.forEach(function(i_bomb) {
+
+			if (!i_bomb.passable) {
+
+				var i_bombBounds = i_bomb.getBounds();
+
+				var i_playerBounds = i_self.getBounds();
+
+				var b_intersects = utils.intersects(i_playerBounds, i_bombBounds);
+
+				if (b_intersects) {
+
+					if (i_bomb.velocity) {
+						i_bomb.velocity = 0;
+					}
+
+					if (a_walk.length > 0) {
+
+						var s_key = a_walk.shift();
+
+						switch (s_key) {
+							case "a":
+								if (i_playerBounds.left <= i_bombBounds.right && i_bombBounds.right < i_playerBounds.right) {
+									i_self.x = i_bombBounds.right + 2;
+								}
+								break;
+							case "d":
+								if (i_playerBounds.right >= i_bombBounds.left && i_bombBounds.right > i_playerBounds.right) {
+									i_self.x = (i_bombBounds.left - i_self.scale.width) - 2;
+								}
+								break;
+							case "w":
+								if (i_playerBounds.top <= i_bombBounds.bottom && i_bombBounds.top < i_playerBounds.top) {
+									i_self.y += 3;
+								}
+								break;
+							case "s":
+								if (i_playerBounds.bottom >= i_bombBounds.top && i_bombBounds.bottom > i_playerBounds.bottom) {
+									i_self.y = (i_bombBounds.top - (i_self.scale.height + 2));
+								}
+								break;
+						}
+
+						a_done.push(s_key);
+					}
+				}
+			}
+		});
+
+		i_self.walk = a_walk;
+		i_self.buttons = [];
+	},
+
 	reset: function() {
 
 		var i_self = this;
@@ -351,10 +491,13 @@ Object.assign(Player.prototype, {
 		i_self.state = state.IDEL;
 		i_self.oldDirection = i_self.direction;
 	},
+
 	update: function() {
 
 		var i_self = this;
-		var a_keys = i_self.walk;
+		var a_keys = i_self.walk.slice();
+		var a_bombs = i_self.bombs;
+
 		if (i_self.state === state.MOVING) {
 
 			if (a_keys.length) {
@@ -412,110 +555,28 @@ Object.assign(Player.prototype, {
 		else {
 			i_self.velocity = 0;
 		}
+
+		var n_remove = 0;
+
+		a_bombs.forEach(function(i_bomb, n_index) {
+			if (i_bomb.exploded) {
+				n_remove++;
+			}
+		});
+
+		if (n_remove) {
+			a_bombs.splice(0, n_remove);
+		}
+
 	},
-	draw: function() {
+
+	draw: function(i_context, i_camera) {
 
 		var i_self = this;
-		var i_canvas = document.getElementById('canvas');
-		var i_context = i_canvas.getContext('2d');
 
-		if (i_canvas.getContext) {
+		var o_viewPort = i_camera.getViewPort();
 
-			var i_context = i_canvas.getContext('2d');
-			var i_playerBounds = i_self.getBounds();
-
-			var n_remove = 0;
-
-			i_self.bombs.forEach(function(i_bomb, n_index) {
-				if (i_bomb.exploded) {
-					n_remove++;
-				}
-			});
-
-			if (n_remove) {
-				i_self.bombs.splice(0, n_remove);
-			}
-
-
-			i_self.bombs.forEach(function(i_bomb) {
-				if (i_bomb.frame) {
-					i_context.drawImage(
-						i_bomb.sprite,
-						i_bomb.frame.x,
-						i_bomb.frame.y,
-						i_bomb.width,
-						i_bomb.height,
-						i_bomb.x,
-						i_bomb.y,
-						i_bomb.scale.width,
-						i_bomb.scale.height
-					);
-
-					var i_bombBounds = i_bomb.getBounds();
-					if (i_bomb.passable) {
-						var b_intersects = utils.intersects(i_playerBounds, i_bombBounds);
-						if (!b_intersects) {
-							i_bomb.passable = false;
-						}
-					}
-					//i_context.fillStyle = 'rgba(0,151,203,0.5)';
-
-					//i_context.fillRect(i_bombBounds.left, i_bombBounds.top, i_bomb.scale.width -10, i_bomb.scale.height - 16);
-				}
-				i_bomb.flames.forEach(function(i_flame) {
-					if (i_flame.frame) {
-						var i_flameBounds = i_flame.getBounds();
-						i_context.drawImage(
-							i_flame.sprite,
-							i_flame.frame.x,
-							i_flame.frame.y,
-							i_flame.width,
-							i_flame.height,
-							i_flame.x,
-							i_flame.y,
-							i_flame.scale.width,
-							i_flame.scale.height
-						);
-
-						var o_bounds = i_flame.getBounds();
-						i_context.fillStyle = 'rgba(0,151,203,0.5)';
-
-						//debug for flames to see bounds...
-						switch (i_flame.direction) {
-							case direction.LEFT:
-								//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width, i_flame.scale.height - 32);
-								break;
-							case direction.RIGHT:
-								//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width, i_flame.scale.height - 32);
-								break;
-							case direction.UP:
-								//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width - 32, i_flame.scale.height);
-								break;
-							case direction.DOWN:
-								//i_context.fillRect(o_bounds.left, o_bounds.top, i_flame.scale.width - 32, i_flame.scale.height);
-								break;
-						}
-
-						var b_intersects = utils.intersects(i_playerBounds, i_flameBounds);
-
-						if (b_intersects && i_self.state != state.DYING) {
-							i_self.doDie();
-						}
-
-						i_self.bombs.forEach(function(i_bomb) {
-							if (i_bomb.flames.length == 0) {
-								var i_bounds = i_bomb.getBounds();
-
-								var b_intersects = utils.intersects(i_bounds, i_flameBounds);
-
-								if (b_intersects) {
-									i_bomb.triggerExplode(function() {});
-								}
-							}
-						});
-					}
-				});
-			});
+		if (i_context) {
 
 			i_context.drawImage(
 				i_self.sprite,
@@ -529,8 +590,8 @@ Object.assign(Player.prototype, {
 				i_self.scale.height
 			);
 			//debug;
-			var o_bounds = i_self.getBounds();
-			//i_context.fillStyle = 'rgba(39,235,133,0.5)';
+			//var o_bounds = i_self.getBounds();
+			//i_context.fillStyle = "rgba(39,235,133,0.5)";
 
 			//i_context.fillRect(o_bounds.left, o_bounds.top, i_self.scale.width, i_self.scale.height - 20);
 		}
